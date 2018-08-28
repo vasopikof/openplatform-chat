@@ -1,0 +1,6 @@
+name                  : Chat
+author                : Peter Širka
+version               : 1.0.0
+
+table.messages        : id:string      | roomid:string | ownerid:string | userid:string | openplatformid:string | body:string | mobile:boolean | ip:string | updated:date | created:date
+table.unread          : ownerid:string | userid:string | count:number   | updated:date  | openplatformid:string

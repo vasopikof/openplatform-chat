@@ -1,0 +1,72 @@
+/*auto*/
+
+$color    : #4285F4;
+
+body { padding:0; margin:0; font:normal 14px Arial; color: #656D78; background-color: white; line-height: 20px; }
+
+.body { margin-left: 220px; position: relative; }
+.padding { padding: 20px 30px; }
+.hidden { display: none; }
+.scroller { overflow-y: auto; overflow-x: hidden; overflow-scrolling: touch; }
+.scroller-padding { padding: 20px 30px 20px 20px; }
+
+.mainmenu { float: left; width: 220px; background-color: #F0F0F0; padding: 0 0 10px; transition: all 0.3s; }
+.mainmenu nav ul { margin: 0; padding: 0; }
+.mainmenu nav li { display: block; width: 90%; border: 0; text-align: left; padding: 6px 10px; background-color: transparent; color: black; outline: 0; text-decoration: none; margin: 0 auto 3px; cursor: pointer; list-style-type: none; }
+.mainmenu nav li:hover { text-decoration: none; }
+.mainmenu nav img { width: 16px; height: 16px; border-radius: 2px; vertical-align: middle; position: relative; display: inline-block; }
+.mainmenu nav li > .fa { width: 20px; text-align: center; margin-right: 5px; }
+.mainmenu nav span { float: right; font-size: 11px; color: gray; text-align: right; }
+.mainmenu .selected { background-color: rgba(0,0,0,0.08) !important; border-radius: 3px; }
+.mainmenu-visible { left: 0 !important; }
+.mainmenu-search { padding: 15px 10px 0; height: 62px; border-bottom: 1px solid #E0E0E0; }
+.mainmenu .scroller { padding: 10px 0; }
+
+.mainmenu nav div { display: none; }
+.ui-avatar-theme-list { display: inline-block !important; margin: -2px 3px 0 0; }
+
+.avatar { overflow: hidden; }
+.green { color: #67B540; }
+
+.search-container { background-color: white; z-index: 2; padding: 18px 20px 15px; border-bottom: 1px solid #E0E0E0; }
+.search { height: 40px; padding: 0; border: 1px solid #E0E0E0; border-radius: 3px; margin-left: 120px; background-color: white; }
+.search-input { margin: 0 0 0 34px; }
+.search-input input { background-color: white; border: 0; font-size: 16px; width: 100%; outline: 0; padding: 10px 10px 0 0; }
+.search-button { float: left; width: 100px; font-size: 14px; font-weight: bold; }
+.search-button .fa { margin-right: 5px; }
+.search-button button { width: 100%; background-color: $color; outline: 0; height: 40px; border: 0; border-radius: 3px; color: white; font-size: 12px; }
+.search-button button:hover { opacity: 0.8; }
+.search-button button:disabled { color: gray; background-color: #F0F0F0; opacity: 1 !important; }
+.search-icon { float: left; width: 34px; font-size: 16px; padding: 10px 0 0; text-align: center; height: 39px; color: #909090; }
+
+.newmessage-container { background-color: white; z-index: 2; padding: 18px 20px 15px; border-top: 1px solid #E0E0E0; }
+.newmessage { height: 40px; padding: 0; border: 1px solid #E0E0E0; border-radius: 3px; }
+.newmessage-input { margin-right: 100px; }
+.newmessage-input input { background-color: transparent; border: 0; font-size: 16px; width: 100%; outline: 0; padding: 10px 10px 0; }
+.newmessage-button { float: right; width: 100px; font-size: 14px; font-weight: bold; }
+.newmessage-button .fa { margin-right: 5px; }
+.newmessage-button button { width: 100%; background-color: $color; outline: 0; height: 38px; border: 0; border-radius: 0 3px 3px 0; color: white; }
+.newmessage-button button:hover { opacity: 0.8; }
+.newmessage-button button:disabled { color: gray; background-color: #F0F0F0; opacity: 1 !important; }
+
+.help { font-size: 11px; color: #A0A0A0; margin-top: 8px; line-height: 13px; }
+.help .fa, .help .far, .help .fal { margin-right: 5px; }
+.help code { font: normal normal 11px Arial; background-color: #F0F0F0; padding: 1px 3px; border-radius: 2px; border: 1px solid #E0E0E0; }
+
+.nmt { margin-top: 0 !important; }
+.b { font-weight: bold; }
+.empty { font-size: 12px; color: #505050; margin: 50px auto 20px; padding: 20px 0; text-align: center; max-width: 250px; border-top: 1px solid #E0E0E0; border-bottom: 1px solid #E0E0E0; }
+.empty span { font-size: 16px; font-weight: bold; color: #68A754; text-transform: uppercase; }
+.m { margin-bottom: 20px; }
+
+.ibutton.remove { color: red; border-color: red; }
+.ibutton { font-size: 11px; background-color: white; border-radius: 3px; border: 1px solid #E0E0E0; outline: 0; padding: 2px 10px; }
+.ibutton:hover { border-color: #D0D0D0; }
+.ibutton .fa { margin-right: 5px; }
+
+@media(max-width: 500px) {
+	.mainmenu { position: absolute; float: none; left: -800px; width: 100%; z-index: 10; }
+	.mainmenu nav a { font-size: 16px; padding: 8px 15px; }
+	.body { margin-left: 0; }
+	.padding { padding: 20px 20px; }
+}

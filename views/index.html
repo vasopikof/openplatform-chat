@@ -1,0 +1,223 @@
+@{layout('')}
+@{title('Files')}
+
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="utf-8" />
+	<meta http-equiv="X-UA-Compatible" content="IE=11" />
+	<meta name="format-detection" content="telephone=no" />
+	<meta name="viewport" content="width=device-width, initial-scale=1" />
+	<meta name="robots" content="all,follow" />
+	<link href="//cdn.componentator.com/spa.min@15.css" rel="stylesheet" />
+	<script src="//cdn.componentator.com/spa.min@15.js"></script>
+	<!-- <script src="//cdn.totaljs.com/openplatform.min@3.js"></script> -->
+	<script src="//openplatform.totaljs.com/openplatform.js"></script>
+	@{import('meta', 'head', 'default.css', 'favicon.ico', 'default.js')}
+</head>
+<body data-jc="exec">
+
+	<div data-jc="LAZY suggestion__null__placeholder:@(Search ...)"></div>
+	<div data-jc="avatar"></div>
+
+	<div class="mainmenu">
+		<div class="mainmenu-search">
+			<div data-jc="textbox__common.search__type:search;placeholder:@(Search users)"></div>
+		</div>
+		<div class="scroller">
+			<nav data-jc="selected__common.selected__selector:li">
+				<ul data-bind="common.users__template">
+				<script type="text/html">
+					{{ foreach m in value }}
+						{{ if !m.owner }}
+							<li data-jr="/{{ m.id }}/" data-if="{{ m.id }}" class="jR{{ m.id | unread }}"><span><i class="fa fa-circle green"></i></span><div class="avatar" data-a="list">{{ m.name }}</div> {{ m.name }}</li>
+						{{ fi }}
+					{{ end }}
+				</script>
+				</ul>
+			</nav>
+		</div>
+	</div>
+
+	<div class="body">
+		<div class="scroller" data-margin="80">
+			<div data-jc="messages__chat.items">
+				<script type="text/html">
+					<div class="ui-messages-container{{ if owner.owner }} ui-messages-owner{{ fi }}">
+						<div class="ui-messages-photo avatar" data-a-url="{{ owner.photo }}">{{ owner.name }}</div>
+						<div class="ui-messages-body">
+							<div class="ui-messages-date">{{ created | time }}<i class="fa fa-clock-o"></i></div>
+							<div class="ui-messages-user">{{ owner.name }}{{ if owner.owner }} <span>@(you)</span>{{ fi }}</div>
+							<div class="ui-messages-ip">{{ if mobile }}<i class="fa fa-tablet"></i>{{ fi }}{{ ip }}</div>
+							<div>{{ body }}</div>
+						</div>
+					</div>
+				</script>
+			</div>
+		</div>
+		<div class="newmessage-container">
+			<div class="newmessage" data-jc="newmessage__newmessage.body__exec:Main/submit">
+				<div class="newmessage-button"><button disabled data-bind="@__disabled:!value || !value.length"><i class="fa fa-keyboard"></i>@(SEND)</button></div>
+				<div class="newmessage-input"><input type="text" placeholder="@(Type a message)" maxlength="1000" data-jc-bind="" /></div>
+			</div>
+		</div>
+	</div>
+
+	<div data-jc="importer__common.state__if:ready">
+		<script type="text/html">
+			<div data-jc="websocket__null__url:/"></div>
+		</script>
+	</div>
+
+	@{json(user, 'userdata')}
+
+	<script>
+
+		var user = PARSE('#userdata');
+		var common = {};
+		var chat = {};
+
+		common.page = '';
+
+		ON('request', function(options) {
+			if (options.url.indexOf('.') === -1)
+				options.url = OPENPLATFORM.tokenizator(options.url);
+		});
+
+		ROUTE('/', ['users'], function() {
+			SET('common.page', 'all');
+		});
+
+		ROUTE('/{id}/', ['users', 'history'], function(id) {
+			var u = common.users.findItem('id', id);
+			SET('common.selected', id);
+			SET('common.page', 'chat');
+		});
+
+		MIDDLEWARE('users', function(next) {
+			if (common.users)
+				return next();
+			AJAX('GET /api/users/', function(response) {
+				var me = response.findItem('id', user.id);
+				me.owner = true;
+				common.users = response;
+				next();
+			});
+		});
+
+		MIDDLEWARE('history', function(next) {
+			var id = NAV.params[0];
+			AJAX('GET /api/messages/{0}/'.format(id), function(response) {
+				response.reverse();
+				SET('chat.items', response);
+				next();
+			});
+		});
+
+		PLUGIN('Main', function(exports) {
+
+			exports.refresh = function() {
+				// load conversations
+			};
+
+			exports.location = function() {
+				// current conversations
+			};
+
+			exports.submit = function(com) {
+				var val = com.get();
+				var data = {};
+
+				data.userid = common.selected;
+				data.body = val;
+
+				AJAX('POST /api/messages/', data, NOOP);
+				com.set('');
+			};
+		});
+
+		ON('location', function() {
+			$('.mainmenu').rclass('mainmenu-visible');
+		});
+
+		ON('message', function(msg) {
+			switch (msg.TYPE) {
+
+				case 'open':
+					var usr = common.users.findItem('id', msg.id);
+					if (usr) {
+						usr.sessions = msg.sessions;
+					}
+					break;
+
+				case 'close':
+					var usr = common.users.findItem('id', msg.id);
+					if (usr) {
+						usr.sessions = msg.sessions;
+					}
+					break;
+
+				case 'message':
+					OPENPLATFORM.play('/knockknock.mp3');
+					if (common.selected === msg.userid)
+						SETTER('messages', 'push', msg);
+					break;
+				case 'unread':
+					chat.unread = {};
+					for (var i = 0; i < msg.items.length; i++) {
+						var u = msg.items[i];
+						chat.unread[u.userid] = u.count;
+					}
+					break;
+			}
+		});
+
+		Tangular.register('username', function(val) {
+			var user = common.users.findItem('id', val);
+			return user ? user.name : 'user not found';
+		});
+
+		Tangular.register('unread', function(id) {
+			return chat.unread && chat.unread[id] ? ' b' : '';
+		});
+
+		Tangular.register('online', function(id) {
+			return chat.online && chat.unread[id] ? ' b' : '';
+		});
+
+		OPENPLATFORM.on('menu', function() {
+			$('.mainmenu').tclass('mainmenu-visible');
+		});
+
+		Tangular.register('time', function(value) {
+			var diff = Date.now() - (value instanceof Date ? value : value.parseDate()).getTime();
+
+			var minutes = ((diff / 1000) / 60) >> 0;
+			if (minutes < 60) {
+				if (minutes < 3)
+					return 'now';
+				return minutes + ' minutes ago';
+			}
+
+			var hours = (minutes / 60) >> 0;
+			if (hours < 24)
+				return hours + ' ' + Tangular.helpers.pluralize(hours, 'hours', 'hour', 'hours', 'hours') + ' ago';
+
+			var days = (hours / 24) >> 0;
+			if (days < 30)
+				return days + ' ' + Tangular.helpers.pluralize(days, 'days', 'day', 'days', 'days') + ' ago';
+
+			var months = (days / 29) >> 0;
+			if (months < 12)
+				return months + ' ' + Tangular.helpers.pluralize(months, 'months', 'month', 'months', 'months') + ' ago';
+
+			var years = (months / 12) >> 0;
+			return years + ' ' + Tangular.helpers.pluralize(years, 'years', 'year', 'years', 'years') + ' ago';
+		});
+
+		SETTER(true, 'avatar', 'register', 'list', 'size:20');
+
+	</script>
+
+</body>
+</html>

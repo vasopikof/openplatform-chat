@@ -1,0 +1,14 @@
+{
+	"name": "Chat",
+	"description": "A chat app",
+	"version": "1.0.0",
+	"icon": "comments",
+	"url": "https://opchat.totaljs.com",
+	"author": "Peter Širka",
+	"email": "petersirka@gmail.com",
+	"roles": [],
+	"width": 800,
+	"height": 600,
+	"resize": true,
+	"origin": []
+}
