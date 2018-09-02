@@ -3,7 +3,7 @@
 	"description": "A chat app",
 	"version": "1.0.0",
 	"icon": "comments",
-	"url": "https://opchat.totaljs.com",
+	"url": "http://127.0.0.1:8003",
 	"author": "Peter Širka",
 	"email": "petersirka@gmail.com",
 	"roles": [],
