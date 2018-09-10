@@ -138,6 +138,8 @@ COMPONENT('suggestion', function(self, config) {
 			is && self.hide(0);
 		});
 
+		var stop = false;
+
 		self.event('keydown', 'input', function(e) {
 			var o = false;
 			switch (e.which) {
@@ -658,5 +660,107 @@ COMPONENT('avatar', function(self) {
 		else if (g < 0)
 			g = 0;
 		return (pound ? '#': '') + (g | (b << 8) | (r << 16)).toString(16);
+	};
+});
+
+COMPONENT('contacts', 'users:common.users', function(self, config) {
+
+	var container, selected, prev;
+
+	self.readonly();
+
+	self.make = function() {
+		var scr = self.find('script');
+		self.template = Tangular.compile(scr.html());
+		self.append('<ul></ul>');
+
+		self.event('click', 'li', function() {
+			var el = $(this);
+			selected = el.attrd('id');
+			EXEC(config.select, selected);
+			self.select();
+
+			var user = self.users(selected);
+			if (user.unread) {
+				user.unread = 0;
+				EXEC(config.unread, selected);
+				el.rclass('unread');
+			}
+
+		});
+
+		self.event('click', '.fa-times', function(e) {
+			var el = $(this).closest('li');
+			var id = el.attrd('id');
+			var arr = self.get();
+			arr.splice(arr.findIndex('userid', id), 1);
+			EXEC(config.remove, el.attrd('id'));
+			el.remove();
+			e.stopPropagation();
+			e.preventDefault();
+		});
+
+		container = self.find('ul');
+	};
+
+	self.users = function(id) {
+		var users = self.get(config.users);
+		return id ? users.findItem('id', id) : users;
+	};
+
+	self.select = function() {
+		prev && prev.rclass('selected');
+		prev = self.find('li[data-id="{0}"]'.format(selected)).aclass('selected');
+	};
+
+	self.online = function(id, sessions) {
+		var user = self.users(id);
+		if (user) {
+			user.sessions = sessions;
+			self.find('li[data-id="{0}"]'.format(id)).tclass('online', sessions > 0);
+		}
+	};
+
+	self.unread = function(id, count) {
+		var user = self.users(id);
+		if (user) {
+
+			var arr = self.get();
+			var item = arr.findItem('userid', id);
+
+			if (!item) {
+				arr.push({ userid: id });
+				self.append(self.template(user));
+				EXEC(config.append, id);
+			}
+
+			self.find('li[data-id="{0}"]'.format(id)).aclass('unread');
+			user.unread = count;
+		}
+	};
+
+	self.watch(config.select, function(path, value) {
+		selected = value;
+		self.select();
+	}, true);
+
+	self.setter = function(value) {
+
+		if (!value || !value.length) {
+			container.empty();
+			return;
+		}
+
+		var builder = [];
+
+		for (var i = 0; i < value.length; i++) {
+			var user = self.users(value[i].userid);
+			user && builder.push(self.template(user));
+		}
+
+		container.html(builder.join(''));
+		prev = null;
+		self.select();
+		SETTER('avatar', 'refresh');
 	};
 });

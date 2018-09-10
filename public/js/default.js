@@ -24,30 +24,11 @@ $(document).ready(resizelayout);
 
 OPENPLATFORM.on('resize', resizelayout);
 OPENPLATFORM.init(function() {
-	common.ready = true;
-	SET('common.state', 'ready');
+	AJAX('GET /api/users/', function(response) {
+		SET('common.ready', true);
+		var me = response.findItem('id', user.id);
+		me.owner = true;
+		SET('common.users', response);
+		SET('common.state', 'ready');
+	});
 });
-
-$(document).on('click', '.task', function() {
-	var el = $(this);
-	var id = el.attrd('id');
-
-	el.tclass('task-checked');
-
-	setTimeout2('task' + id, function(el) {
-
-		var id = el.attrd('id');
-		var is = el.hclass('task-checked');
-		var item = tasks.db.findItem('id', id);
-		if (item) {
-			if (item.completed !== is) {
-				item.completed = is;
-				AJAX('GET /api/tasks/{id}/complete/?is='.arg(item) + (is ? '1' : '0'));
-				EXEC('app/prepare');
-			}
-		}
-
-	}, 1000, null, el);
-});
-
-OPENPLATFORM.on('screenshot', console.log);

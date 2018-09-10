@@ -19,45 +19,41 @@
 	<div data-jc="LAZY suggestion__null__placeholder:@(Search ...)"></div>
 	<div data-jc="avatar"></div>
 
-	<div class="mainmenu">
-		<div class="mainmenu-search">
-			<div data-jc="textbox__common.search__type:search;placeholder:@(Search users)"></div>
-		</div>
-		<div class="scroller">
-			<nav data-jc="selected__common.selected__selector:li">
-				<ul data-bind="common.users__template">
-				<script type="text/html">
-					{{ foreach m in value }}
-						{{ if !m.owner }}
-							<li data-jr="/{{ m.id }}/" data-if="{{ m.id }}" class="jR{{ m.id | unread }}"><span><i class="fa fa-circle green"></i></span><div class="avatar" data-a="list">{{ m.name }}</div> {{ m.name }}</li>
-						{{ fi }}
-					{{ end }}
-				</script>
-				</ul>
-			</nav>
-		</div>
-	</div>
-
-	<div class="body">
-		<div class="scroller" data-margin="80">
-			<div data-jc="messages__chat.items">
-				<script type="text/html">
-					<div class="ui-messages-container{{ if owner.owner }} ui-messages-owner{{ fi }}">
-						<div class="ui-messages-photo avatar" data-a-url="{{ owner.photo }}">{{ owner.name }}</div>
-						<div class="ui-messages-body">
-							<div class="ui-messages-date">{{ created | time }}<i class="fa fa-clock-o"></i></div>
-							<div class="ui-messages-user">{{ owner.name }}{{ if owner.owner }} <span>@(you)</span>{{ fi }}</div>
-							<div class="ui-messages-ip">{{ if mobile }}<i class="fa fa-tablet"></i>{{ fi }}{{ ip }}</div>
-							<div>{{ body }}</div>
-						</div>
-					</div>
-				</script>
+	<div data-bind="common.ready__show:value" class="hidden">
+		<div class="mainmenu">
+			<div class="mainmenu-search">
+				<button class="button exec" data-exec="Main/contacts"><i class="fa fa-user-circle"></i>@(Address book)</button>
+			</div>
+			<div class="scroller">
+				<nav data-jc="contacts__chat.contacts__select:Main/select;remove:Main/remcontact;append:Main/addcontact;unread:Main/unread">
+					<script type="text/html">
+						<li data-id="{{ id }}" class="jR{{ if unread }} unread{{ fi }}{{ if sessions }} online{{ fi }}"><i class="fa fa-times exec" data-exec="Main/remove"></i><span><i class="fa fa-circle"></i></span>{{ name }}</li>
+					</script>
+				</nav>
 			</div>
 		</div>
-		<div class="newmessage-container">
-			<div class="newmessage" data-jc="newmessage__newmessage.body__exec:Main/submit">
-				<div class="newmessage-button"><button disabled data-bind="@__disabled:!value || !value.length"><i class="fa fa-keyboard"></i>@(SEND)</button></div>
-				<div class="newmessage-input"><input type="text" placeholder="@(Type a message)" maxlength="1000" data-jc-bind="" /></div>
+
+		<div class="body">
+			<div class="scroller" data-margin="80">
+				<div data-jc="messages__chat.items">
+					<script type="text/html">
+						<div class="ui-messages-container{{ if owner.owner }} ui-messages-owner{{ fi }}">
+							<div class="ui-messages-photo avatar" data-a-url="{{ owner.photo }}">{{ owner.name }}</div>
+							<div class="ui-messages-body">
+								<div class="ui-messages-date"><span class="time" data-date="{{ created | format }}">{{ created | time }}</span><i class="fa fa-clock-o"></i></div>
+								<div class="ui-messages-user">{{ owner.name }}{{ if owner.owner }} <span>@(you)</span>{{ fi }}</div>
+								<div class="ui-messages-ip">{{ if mobile }}<i class="fa fa-tablet"></i>{{ fi }}{{ ip }}</div>
+								<div>{{ body }}</div>
+							</div>
+						</div>
+					</script>
+				</div>
+			</div>
+			<div class="newmessage-container newmessage-hidden" data-bind="common.selected__.newmessage-hidden:!value">
+				<div class="newmessage" data-jc="newmessage__newmessage.body__exec:Main/submit">
+					<div class="newmessage-button"><button disabled data-bind="@__disabled:!value || !value.length"><i class="fa fa-keyboard"></i>@(SEND)</button></div>
+					<div class="newmessage-input"><input type="text" placeholder="@(Type a message)" maxlength="1000" data-jc-bind="" /></div>
+				</div>
 			</div>
 		</div>
 	</div>
@@ -83,46 +79,49 @@
 				options.url = OPENPLATFORM.tokenizator(options.url);
 		});
 
-		ROUTE('/', ['users'], function() {
-			SET('common.page', 'all');
-		});
-
-		ROUTE('/{id}/', ['users', 'history'], function(id) {
-			var u = common.users.findItem('id', id);
-			SET('common.selected', id);
-			SET('common.page', 'chat');
-		});
-
-		MIDDLEWARE('users', function(next) {
-			if (common.users)
-				return next();
-			AJAX('GET /api/users/', function(response) {
-				var me = response.findItem('id', user.id);
-				me.owner = true;
-				common.users = response;
-				next();
-			});
-		});
-
-		MIDDLEWARE('history', function(next) {
-			var id = NAV.params[0];
-			AJAX('GET /api/messages/{0}/'.format(id), function(response) {
-				response.reverse();
-				SET('chat.items', response);
-				next();
-			});
-		});
-
 		PLUGIN('Main', function(exports) {
 
-			exports.refresh = function() {
-				// load conversations
+			exports.contacts = function(el) {
+				var items = [];
+				SETTER('suggestion', 'show', 'left', el, common.users.findAll(FN('n => n.id !== user.id')), function(item) {
+					var id = item.id;
+					if (!chat.contacts.findItem('userid', id)) {
+						SETTER('websocket', 'send', { TYPE: 'contacts-add', userid: id });
+						PUSH('chat.contacts', { userid: id });
+					}
+				}, 5, 5);
 			};
 
-			exports.location = function() {
-				// current conversations
+			// Select contact
+			exports.select = function(id) {
+
+				if (common.selected === id)
+					return;
+
+				common.selected = id;
+				AJAX('GET /api/messages/{0}/'.format(id), function(response) {
+					response.reverse();
+					SET('chat.items', response);
+					var u = common.users.findItem('id', id);
+					SET('common.page', 'chat');
+					UPDATE('common.selected');
+				});
 			};
 
+			exports.unread = function(id) {
+				SETTER('websocket', 'send', { TYPE: 'unread', userid: id });
+			};
+
+			exports.addcontact = function(id) {
+				id && SETTER('websocket', 'send', { TYPE: 'contacts-add', userid: id });
+			};
+
+			// Remove contact
+			exports.remcontact = function(id) {
+				id && SETTER('websocket', 'send', { TYPE: 'contacts-rem', userid: id });
+			};
+
+			// Submit message
 			exports.submit = function(com) {
 				var val = com.get();
 				var data = {};
@@ -133,40 +132,62 @@
 				AJAX('POST /api/messages/', data, NOOP);
 				com.set('');
 			};
+
 		});
 
 		ON('location', function() {
 			$('.mainmenu').rclass('mainmenu-visible');
 		});
 
+		ON('knockknock', function() {
+			$('.time').each(function() {
+				var el = $(this);
+				el.html(Thelpers.time(el.attrd('date').parseDate()));
+			});
+		});
+
+		ON('online', function(is) {
+			OPENPLATFORM.loading(!is);
+		});
+
 		ON('message', function(msg) {
+
 			switch (msg.TYPE) {
 
-				case 'open':
-					var usr = common.users.findItem('id', msg.id);
-					if (usr) {
-						usr.sessions = msg.sessions;
-					}
+				case 'init':
+					WAIT('common.users', function() {
+						SETTER('websocket', 'send', { TYPE: 'contacts' });
+					});
 					break;
 
+				case 'contacts':
+					SET('chat.contacts', msg.items);
+					break;
+
+				case 'open':
 				case 'close':
-					var usr = common.users.findItem('id', msg.id);
-					if (usr) {
-						usr.sessions = msg.sessions;
-					}
+					SETTER('contacts', 'online', msg.id, msg.sessions);
 					break;
 
 				case 'message':
-					OPENPLATFORM.play('/knockknock.mp3');
-					if (common.selected === msg.userid)
+
+					if (msg.ownerid !== user.id)
+						OPENPLATFORM.play('/knockknock.mp3');
+
+					if (common.selected === msg.userid || common.selected === msg.ownerid)
 						SETTER('messages', 'push', msg);
+					else
+						SETTER('contacts', 'unread', msg.ownerid, 1);
+
 					break;
+
 				case 'unread':
-					chat.unread = {};
-					for (var i = 0; i < msg.items.length; i++) {
-						var u = msg.items[i];
-						chat.unread[u.userid] = u.count;
-					}
+					WAIT('chat.contacts', function() {
+						for (var i = 0; i < msg.items.length; i++) {
+							var u = msg.items[i];
+							SETTER('contacts', 'unread', u.userid, u.count);
+						}
+					});
 					break;
 			}
 		});
