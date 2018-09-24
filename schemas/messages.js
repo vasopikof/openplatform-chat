@@ -1,5 +1,3 @@
-var UNREAD = { '+count': 1 };
-
 NEWSCHEMA('Message', function(schema) {
 
 	schema.define('userid', 'UID', true);
@@ -35,7 +33,7 @@ NEWSCHEMA('Message', function(schema) {
 
 		var is = false;
 
-		MAIN.ws.send(msg, function(id, client) {
+		MAIN.ws && MAIN.ws.send(msg, function(id, client) {
 
 			if (client.user.openplatformid !== $.user.openplatformid)
 				return false;
@@ -53,11 +51,14 @@ NEWSCHEMA('Message', function(schema) {
 		if (is)
 			return;
 
-		UNREAD.updated = NOW;
+		var data = {};
+		data['+count'] = 1;
+		data.updated = NOW;
 
-		TABLE('unread').modify(UNREAD, true).first().where('ownerid', model.userid).where('userid', $.user.id).insert(function(doc) {
+		TABLE('unread').modify(data, true).first().where('ownerid', model.userid).where('userid', $.user.id).insert(function(doc) {
 			doc.ownerid = model.userid;
 			doc.userid = model.ownerid;
+			doc.openplatformid = $.user.openplatformid;
 		});
 	});
 

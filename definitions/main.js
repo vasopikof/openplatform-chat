@@ -20,3 +20,12 @@ MAIN.badge = function(user) {
 		builder.exec(ERROR('MAIN.badge()'));
 	});
 };
+
+MAIN.sessions = function(opid, userid, sessions) {
+	var meta = MAIN.users[opid];
+	if (meta) {
+		var user = meta.users.findItem('id', userid);
+		if (user)
+			user.sessions = sessions;
+	}
+};
