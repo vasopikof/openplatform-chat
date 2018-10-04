@@ -167,10 +167,8 @@
 
 				case 'contacts':
 					SET('chat.contacts', msg.items);
-					if (!common.selected && msg.items && !msg.items.length) {
-						var id = msg.items[0].userid;
-						EXEC('Main/select', id);
-					}
+					if (!common.selected && msg.items && msg.items.length)
+						EXEC('Main/select', msg.items[0].userid);
 					break;
 
 				case 'open':
