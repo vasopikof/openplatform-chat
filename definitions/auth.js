@@ -66,7 +66,7 @@ function synchronize(user, callback) {
 			!meta && (meta = MAIN.users[user.openplatformid] = {});
 			meta.users = users.map(function(item) {
 				var user = meta.users ? meta.users.findItem('id', item.id) : 0;
-				return { id: item.id, name: item.name, notify: item.notify, notifications: item.notifications, badge: item.badge, photo: item.photo, sessions: user ? user.sessions : 0 };
+				return { id: item.id, name: item.lastname + ' ' + item.firstname, notify: item.notify, notifications: item.notifications, badge: item.badge, photo: item.photo, sessions: user ? user.sessions : 0 };
 			});
 			meta.updated = NOW;
 			callback && callback();

@@ -8,12 +8,15 @@ const WSINIT = { TYPE: 'init' };
 exports.install = function() {
 
 	GROUP(['authorize'], function() {
-		ROUTE('GET      /api/users/                  *User --> @query');
+		ROUTE('GET      /api/users/                  *User    --> @query');
 		ROUTE('GET      /api/messages/{id}/          *Message --> @query');
 		ROUTE('POST     /api/messages/               *Message --> @insert');
+		ROUTE('POST     /api/upload/                 *        --> @binary', ['upload'], 1024 * 5); // 5 MB
+		ROUTE('POST     /api/upload/base64/          *        --> @base64', 1024 * 5); // 5 MB
 	});
 
 	WEBSOCKET('/', socket, ['json', 'authorize']);
+	FILE('/files/', file_read);
 };
 
 function socket() {
@@ -75,4 +78,11 @@ function socket() {
 				break;
 		}
 	});
+}
+
+// Reads a specific file from database
+// URL: /download/*.*
+function file_read(req, res) {
+	var id = req.split[1].replace('.' + req.extension, '');
+	res.filefs('files', id);
 }

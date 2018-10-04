@@ -29,14 +29,65 @@ COMPONENT('messages', function(self) {
 		el.prop('scrollTop', el[0].scrollHeight);
 	};
 
+	self.scroll2 = function() {
+		setTimeout(self.scroll, 500);
+		setTimeout(self.scroll, 800);
+		setTimeout(self.scroll, 1500);
+	};
+
 	self.push = function(msg) {
 		msg.user = common.users.findItem('id', msg.userid);
 		msg.owner = common.users.findItem('id', msg.ownerid);
 		self.append(self.template(msg));
 		self.get().push(msg);
 		SETTER(true, 'avatar', 'refresh');
-		self.scroll();
+		self.scroll2();
 	};
+
+	var has = false;
+
+	self.event('dragenter dragover dragexit drop dragleave', function (e) {
+
+		e.stopPropagation();
+		e.preventDefault();
+
+		switch (e.type) {
+			case 'drop':
+				has && self.rclass('ui-messages-dragdrop');
+				break;
+			case 'dragenter':
+			case 'dragover':
+				!has && self.aclass('ui-messages-dragdrop');
+				has = true;
+				return;
+			case 'dragleave':
+			case 'dragexit':
+			default:
+				setTimeout2(self.id, function() {
+					has && self.rclass('ui-messages-dragdrop');
+					has = false;
+				}, 100);
+				return;
+		}
+
+		var files = e.originalEvent.dataTransfer.files;
+		var data = new FormData();
+		data.append('file', files[0]);
+
+		OP.loading(true);
+		UPLOAD('POST /api/upload/', data, function(response) {
+			OP.loading(false, 500);
+			if (response.success) {
+				var data = {};
+				var value = response.value;
+				data.userid = common.selected;
+				data.body = (/\.(jpg|gif|png|svg|jpeg)$/).test(value.name) ? '<img src="{0}" class="img-responsive" alt="{1}" />'.format(value.url, value.name) : '<a href="{0}" target="_blank">{1}</a>'.format(value.url, value.name);
+				data.raw = true;
+				AJAX('POST /api/messages/', data, NOOP);
+			}
+		});
+
+	});
 
 	self.setter = function(value) {
 
@@ -55,7 +106,7 @@ COMPONENT('messages', function(self) {
 		}
 
 		self.html(builder.join(''));
-		self.scroll();
+		self.scroll2();
 		SETTER(true, 'avatar', 'refresh');
 	};
 });
@@ -695,6 +746,7 @@ COMPONENT('contacts', 'users:common.users', function(self, config) {
 			var arr = self.get();
 			arr.splice(arr.findIndex('userid', id), 1);
 			EXEC(config.remove, el.attrd('id'));
+			self.update('remove');
 			el.remove();
 			e.stopPropagation();
 			e.preventDefault();
@@ -739,12 +791,15 @@ COMPONENT('contacts', 'users:common.users', function(self, config) {
 		}
 	};
 
-	self.watch(config.select, function(path, value) {
+	self.watch(config.active, function(path, value) {
 		selected = value;
 		self.select();
 	}, true);
 
-	self.setter = function(value) {
+	self.setter = function(value, path, type) {
+
+		if (type === 'remove')
+			return;
 
 		if (!value || !value.length) {
 			container.empty();

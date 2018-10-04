@@ -6,6 +6,7 @@ body { padding:0; margin:0; font:normal 14px Arial; color: #656D78; background-c
 
 .body { margin-left: 220px; position: relative; }
 .padding { padding: 20px 30px; }
+.padding2 { padding: 15px; }
 .hidden { display: none; }
 .scroller { overflow-y: auto; overflow-x: hidden; overflow-scrolling: touch; }
 .scroller-padding { padding: 20px 30px 20px 20px; }
@@ -25,6 +26,7 @@ body { padding:0; margin:0; font:normal 14px Arial; color: #656D78; background-c
 .mainmenu nav div { display: none; }
 .ui-avatar-theme-list { display: inline-block !important; margin: -2px 3px 0 0; }
 
+.center { text-align: center; }
 .avatar { overflow: hidden; }
 .green { color: #67B540; }
 .online > span { color: #67B540 !important; }

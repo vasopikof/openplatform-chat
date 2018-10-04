@@ -26,3 +26,4 @@
 .ui-messages-date { float: right; font-size: 11px; }
 .ui-messages-date .fa { margin-left: 5px; }
 .ui-messages-owner { background-color: #FFFBE6; }
+.ui-messages-dragdrop { opacity: 0.5; }

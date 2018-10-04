@@ -25,7 +25,13 @@
 				<button class="button exec" data-exec="Main/contacts"><i class="fa fa-user-circle"></i>@(Address book)</button>
 			</div>
 			<div class="scroller">
-				<nav data-jc="contacts__chat.contacts__select:Main/select;remove:Main/remcontact;append:Main/addcontact;unread:Main/unread">
+
+				<div data-bind="!chat.contacts__show:!value.length" class="hidden center padding2">
+					<i class="fa fa-arrow-up fa-2x" style="color:#A0A0A0"></i>
+					<div class="help">@(You don't have any favorite contact. Choose one from Address Book.)</div>
+				</div>
+
+				<nav data-jc="contacts__chat.contacts__active:common.selected;select:Main/select;remove:Main/remcontact;append:Main/addcontact;unread:Main/unread">
 					<script type="text/html">
 						<li data-id="{{ id }}" class="jR{{ if unread }} unread{{ fi }}{{ if sessions }} online{{ fi }}"><i class="fa fa-times exec" data-exec="Main/remove"></i><span><i class="fa fa-circle"></i></span>{{ name }}</li>
 					</script>
@@ -43,7 +49,7 @@
 								<div class="ui-messages-date"><span class="time" data-date="{{ created | format }}">{{ created | time }}</span><i class="fa fa-clock-o"></i></div>
 								<div class="ui-messages-user">{{ owner.name }}{{ if owner.owner }} <span>@(you)</span>{{ fi }}</div>
 								<div class="ui-messages-ip">{{ if mobile }}<i class="fa fa-tablet"></i>{{ fi }}{{ ip }}</div>
-								<div>{{ body }}</div>
+								<div>{{ if raw }}{{ body | raw }}{{ else }}{{ body }}{{ fi }}</div>
 							</div>
 						</div>
 					</script>
@@ -74,9 +80,11 @@
 
 		common.page = '';
 
+		CACHEPATH('common.selected', '1 month');
+
 		ON('request', function(options) {
 			if (options.url.indexOf('.') === -1)
-				options.url = OPENPLATFORM.tokenizator(options.url);
+				options.url = OP.tokenizator(options.url);
 		});
 
 		PLUGIN('Main', function(exports) {
@@ -88,16 +96,13 @@
 					if (!chat.contacts.findItem('userid', id)) {
 						SETTER('websocket', 'send', { TYPE: 'contacts-add', userid: id });
 						PUSH('chat.contacts', { userid: id });
+						exports.select(id);
 					}
 				}, 5, 5);
 			};
 
 			// Select contact
 			exports.select = function(id) {
-
-				if (common.selected === id)
-					return;
-
 				common.selected = id;
 				AJAX('GET /api/messages/{0}/'.format(id), function(response) {
 					response.reverse();
@@ -105,6 +110,7 @@
 					var u = common.users.findItem('id', id);
 					SET('common.page', 'chat');
 					UPDATE('common.selected');
+					!isMOBILE && $('.newmessage-input input').focus();
 				});
 			};
 
@@ -125,10 +131,8 @@
 			exports.submit = function(com) {
 				var val = com.get();
 				var data = {};
-
 				data.userid = common.selected;
 				data.body = val;
-
 				AJAX('POST /api/messages/', data, NOOP);
 				com.set('');
 			};
@@ -147,7 +151,7 @@
 		});
 
 		ON('online', function(is) {
-			OPENPLATFORM.loading(!is);
+			OP.loading(!is);
 		});
 
 		ON('message', function(msg) {
@@ -157,11 +161,16 @@
 				case 'init':
 					WAIT('common.users', function() {
 						SETTER('websocket', 'send', { TYPE: 'contacts' });
+						common.selected && EXEC('Main/select', common.selected);
 					});
 					break;
 
 				case 'contacts':
 					SET('chat.contacts', msg.items);
+					if (!common.selected && msg.items && !msg.items.length) {
+						var id = msg.items[0].userid;
+						EXEC('Main/select', id);
+					}
 					break;
 
 				case 'open':
@@ -172,7 +181,7 @@
 				case 'message':
 
 					if (msg.ownerid !== user.id)
-						OPENPLATFORM.play('/knockknock.mp3');
+						OP.play('/knockknock.mp3');
 
 					if (common.selected === msg.userid || common.selected === msg.ownerid)
 						SETTER('messages', 'push', msg);
@@ -205,7 +214,7 @@
 			return chat.online && chat.unread[id] ? ' b' : '';
 		});
 
-		OPENPLATFORM.on('menu', function() {
+		OP.on('menu', function() {
 			$('.mainmenu').tclass('mainmenu-visible');
 		});
 

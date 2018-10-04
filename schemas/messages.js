@@ -2,6 +2,7 @@ NEWSCHEMA('Message', function(schema) {
 
 	schema.define('userid', 'UID', true);
 	schema.define('body', 'String(500)', true);
+	schema.define('raw', Boolean);
 
 	schema.setInsert(function($) {
 
@@ -11,7 +12,6 @@ NEWSCHEMA('Message', function(schema) {
 			$.invalid().push('error-users-404');
 			return;
 		}
-
 
 		var model = $.clean();
 		model.id = UID('messages');
