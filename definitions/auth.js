@@ -68,6 +68,7 @@ function synchronize(user, callback) {
 				var user = meta.users ? meta.users.findItem('id', item.id) : 0;
 				return { id: item.id, name: item.lastname + ' ' + item.firstname, notify: item.notify, notifications: item.notifications, badge: item.badge, photo: item.photo, sessions: user ? user.sessions : 0 };
 			});
+			meta.users.quicksort('name');
 			meta.updated = NOW;
 			callback && callback();
 		});
