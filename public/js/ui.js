@@ -7,9 +7,13 @@ COMPONENT('newmessage', function(self, config) {
 		});
 
 		self.event('keydown', 'input', function(e) {
-			e.keyCode === 13 && this.value && setTimeout(function() {
-				config.exec && EXEC(config.exec, self);
-			}, 100);
+			if (e.keyCode === 13) {
+				this.value && setTimeout(function() {
+					config.exec && EXEC(config.exec, self);
+				}, 100);
+				e.stopPropagation();
+				e.preventDefault();
+			}
 		});
 
 	};
