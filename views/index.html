@@ -49,14 +49,14 @@
 								<div class="ui-messages-date"><span class="time" data-date="{{ created | format }}">{{ created | time }}</span><i class="fa fa-clock-o"></i></div>
 								<div class="ui-messages-user">{{ owner.name }}{{ if owner.owner }} <span>@(you)</span>{{ fi }}</div>
 								<div class="ui-messages-ip">{{ if mobile }}<i class="fa fa-tablet"></i>{{ fi }}{{ ip }}</div>
-								<div>{{ if raw }}{{ body | raw }}{{ else }}{{ body }}{{ fi }}</div>
+								<div>{{ if raw }}{{ body | raw }}{{ else }}{{ body | message }}{{ fi }}</div>
 							</div>
 						</div>
 					</script>
 				</div>
 			</div>
 			<div class="newmessage-container newmessage-hidden" data-bind="common.selected__.newmessage-hidden:!value">
-				<div class="newmessage" data-jc="newmessage__newmessage.body__exec:Main/submit">
+				<div class="newmessage" data-jc="newmessage__newmessage.body__exec:Main/submit;$delay:1">
 					<div class="newmessage-button"><button disabled data-bind="@__disabled:!value || !value.length"><i class="fa fa-keyboard"></i>@(SEND)</button></div>
 					<div class="newmessage-input"><input type="text" placeholder="@(Type a message)" maxlength="1000" data-jc-bind="" /></div>
 				</div>
@@ -216,7 +216,7 @@
 			$('.mainmenu').tclass('mainmenu-visible');
 		});
 
-		Tangular.register('time', function(value) {
+		Thelpers.time = function(value) {
 			var diff = Date.now() - (value instanceof Date ? value : value.parseDate()).getTime();
 
 			var minutes = ((diff / 1000) / 60) >> 0;
@@ -240,7 +240,11 @@
 
 			var years = (months / 12) >> 0;
 			return years + ' ' + Tangular.helpers.pluralize(years, 'years', 'year', 'years', 'years') + ' ago';
-		});
+		};
+
+		Thelpers.message = function(value) {
+			return smilefy(urlify(mailify(Thelpers.encode(value))));
+		};
 
 		SETTER(true, 'avatar', 'register', 'list', 'size:20');
 
