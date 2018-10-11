@@ -78,6 +78,21 @@ body { padding:0; margin:0; font:normal 14px Arial; color: #656D78; background-c
 
 .unread { font-weight: bold; }
 
+.smiles { background-image: url(../img/smilefy.png); width: 18px; height: 18px; position: relative; display: inline-block; vertical-align: middle; margin-top: -1px; }
+.smiles-0 { background-position: 0 0; }
+.smiles-1 { background-position: -18px 0; }
+.smiles-2 { background-position: -36px 0; }
+.smiles-3 { background-position: -54px 0; }
+.smiles-4 { background-position: -72px 0; }
+.smiles-5 { background-position: -90px 0; }
+.smiles-6 { background-position: -108px 0; }
+.smiles-7 { background-position: -126px 0; }
+.smiles-8 { background-position: -144px 0; }
+.smiles-9 { background-position: -162px 0; }
+.smiles-10 { background-position: -180px 0; }
+.smiles-11 { background-position: -198px 0; }
+.smiles-12 { background-position: -216px 0; }
+
 @media(max-width: 500px) {
 	.mainmenu { position: absolute; float: none; left: -800px; width: 100%; z-index: 10; }
 	.mainmenu nav a { font-size: 16px; padding: 8px 15px; }

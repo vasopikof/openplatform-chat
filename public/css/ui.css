@@ -18,9 +18,9 @@
 .ui-messages-container:first-child { border-top: 0; }
 .ui-messages-container { border-top: 1px solid #E0E0E0; padding: 15px 30px 15px 10px; }
 .ui-messages-photo { float: left; width: 40px; }
-.ui-messages-body { margin-left: 55px; min-height: 40px; }
+.ui-messages-body { margin-left: 55px; min-height: 40px; line-height: 16px; }
 .ui-messages-user { font-size: 12px; font-weight: bold; color: black; line-height: 14px; }
-.ui-messages-ip { font-size: 10px; color: #909090; }
+.ui-messages-ip { font-size: 10px; color: #909090; margin-bottom: 5px; }
 .ui-messages-ip .fa { margin-right: 5px; }
 .ui-messages-user span { font-size: 10px; position: relative; display: inline-block; background-color: #1252E7; color: white; padding: 1px 3px; line-height: 12px; border-radius: 3px; vertical-align: top; }
 .ui-messages-date { float: right; font-size: 11px; }
