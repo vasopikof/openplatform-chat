@@ -3,6 +3,6 @@ author                : Peter Širka
 version               : 1.0.0
 cdn                   : //cdn.componentator.com
 
-table.messages        : id:string      | roomid:string | ownerid:string | userid:string | openplatformid:string | body:string | mobile:boolean | ip:string | updated:date | created:date
+table.messages        : id:string      | roomid:string | ownerid:string | userid:string | openplatformid:string | body:string | mobile:boolean | raw:boolean | ip:string | updated:date | created:date
 table.unread          : ownerid:string | userid:string | count:number   | updated:date  | openplatformid:string
 table.contacts        : ownerid:string | userid:string | active:boolean
