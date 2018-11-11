@@ -64,7 +64,7 @@ function synchronize(user, callback) {
 		builder.url(user.users);
 		builder.exec(function(err, users) {
 			!meta && (meta = MAIN.users[user.openplatformid] = {});
-			meta.users = users.map(function(item) {
+			meta.users = users.items.map(function(item) {
 				var user = meta.users ? meta.users.findItem('id', item.id) : 0;
 				return { id: item.id, name: item.lastname + ' ' + item.firstname, notify: item.notify, notifications: item.notifications, badge: item.badge, photo: item.photo, sessions: user ? user.sessions : 0 };
 			});
